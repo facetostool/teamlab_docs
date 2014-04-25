@@ -19,8 +19,24 @@ public class TeamlabAPI {
     }
 
     public void auth(String userName, String password) {
-        TeamlabAPIAuth auth = new TeamlabAPIAuth(this.portalName, this.region, this.server);
-        this.token = auth.getToken(userName, password);
+        TeamlabAPIAuth auth = new TeamlabAPIAuth(this.apiURL);
+        String token = auth.getToken(userName, password);
+        System.out.println("Your token: " + token);
+        if (!token.equals("")) {
+            this.token = token;
+        } else {
+            throw new IllegalArgumentException("Empty token!");
+        }
+    }
+
+    public TeamlabAPIFiles documentsAPI() {
+        TeamlabAPIFiles documentsAPI = null;
+        if(this.token != null) {
+            documentsAPI = new TeamlabAPIFiles(this.apiURL, this.token);
+        } else {
+            throw new IllegalAccessError("Please log in!");
+        }
+        return documentsAPI;
     }
 	
 }

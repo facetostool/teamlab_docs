@@ -12,39 +12,20 @@ import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 
 public class Request {
-	
-	private final String USER_AGENT = "Mozilla/5.0";
-	private String url;
-	private boolean useSSL = false;
 
-    public Request() {
-
-    }
-
-    public Request(String url, Boolean useSSL) {
-        this.url = url;
-        this.useSSL = useSSL;
-    }
+	private static boolean USE_SSL = true;
 	
-	public void sendURL(String url) {
-		this.url = url;
-	}
-	
-	public void useSSL(boolean useSSL) {
-		this.useSSL = useSSL;
-	}
-	
-	private String fullURL() {
+	private static String fullURL(String url) {
 		String full;
-		if (this.useSSL) {
-			full = "https://" + this.url;
+		if (USE_SSL) {
+			full = "https://" + url;
 		} else {
-			full = "http://" + this.url;
+			full = "http://" + url;
 		}
 		return full;
 	}
 
-    public HttpsURLConnection createConnection(String url) {
+    public static HttpsURLConnection createConnection(String url) {
         URL obj = null;
         try {
             obj = new URL(url);
@@ -64,13 +45,15 @@ public class Request {
         return con;
     }
 	
-	public String sendGet(HashMap params) {
+	public static String sendGet(String url, HashMap params, String token) {
         String response = null;
         String sendingParams = parseParams(params);
-        String fullUrl = fullURL();
+        String fullUrl = fullURL(url);
         HttpsURLConnection con = createConnection(fullUrl);
 
         if (con != null) {
+            con.setRequestProperty("Authorization", token);
+
             try {
                 con.setRequestMethod("GET");
             } catch (ProtocolException e) {
@@ -80,21 +63,23 @@ public class Request {
             // Send post request
             con.setDoOutput(true);
 
-            DataOutputStream wr = null;
-            try {
-                wr = new DataOutputStream(con.getOutputStream());
-            } catch (IOException e) {
-                System.out.println("Can't read DataOutputStream!");
-                e.printStackTrace();
-            }
-            if (wr != null) {
+            if(!sendingParams.equals("")) {
+                DataOutputStream wr = null;
                 try {
-                    wr.writeBytes(sendingParams);
-                    wr.flush();
-                    wr.close();
+                    wr = new DataOutputStream(con.getOutputStream());
                 } catch (IOException e) {
-                    System.out.println("Can't puts params for request: " + sendingParams);
+                    System.out.println("Can't read DataOutputStream!");
                     e.printStackTrace();
+                }
+                if (wr != null) {
+                    try {
+                        wr.writeBytes(sendingParams);
+                        wr.flush();
+                        wr.close();
+                    } catch (IOException e) {
+                        System.out.println("Can't puts params for request: " + sendingParams);
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -105,6 +90,7 @@ public class Request {
                 e.printStackTrace();
             }
             System.out.println("\nSending 'GET' request to URL : " + fullUrl);
+            System.out.println("Post parameters : " + sendingParams);
             System.out.println("Response Code : " + responseCode);
             try {
                 response = readResponce(con).toString();
@@ -117,14 +103,15 @@ public class Request {
 		return  response;
 	}
 	
-	public String sendPost(HashMap params) {
-        String fullUrl = fullURL();
+	public static String sendPost(String url, HashMap params, String token) {
+        String fullUrl = fullURL(url);
 		String sendingParams = parseParams(params);
         String response = null;
         HttpsURLConnection con = createConnection(fullUrl);
 
         if (con != null) {
             con.setDoInput(true);
+            con.setRequestProperty("Authorization", token);
             //add request header
             try {
                 con.setRequestMethod("POST");
@@ -136,21 +123,23 @@ public class Request {
             // Send post request
             con.setDoOutput(true);
 
-            DataOutputStream wr = null;
-            try {
-                wr = new DataOutputStream(con.getOutputStream());
-            } catch (IOException e) {
-                System.out.println("Can't read DataOutputStream!");
-                e.printStackTrace();
-            }
-            if (wr != null) {
+            if(!sendingParams.equals("")) {
+                DataOutputStream wr = null;
                 try {
-                    wr.writeBytes(sendingParams);
-                    wr.flush();
-                    wr.close();
+                    wr = new DataOutputStream(con.getOutputStream());
                 } catch (IOException e) {
-                    System.out.println("Can't puts params for request: " + sendingParams);
+                    System.out.println("Can't read DataOutputStream!");
                     e.printStackTrace();
+                }
+                if (wr != null) {
+                    try {
+                        wr.writeBytes(sendingParams);
+                        wr.flush();
+                        wr.close();
+                    } catch (IOException e) {
+                        System.out.println("Can't puts params for request: " + sendingParams);
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -161,7 +150,7 @@ public class Request {
                 System.out.println("Can't getting response code.");
                 e.printStackTrace();
             }
-            System.out.println("\nSending 'POST' request to URL : " + fullURL());
+            System.out.println("\nSending 'POST' request to URL : " + fullUrl);
             System.out.println("Post parameters : " + sendingParams);
             System.out.println("Response Code : " + responseCode);
 
@@ -177,9 +166,9 @@ public class Request {
     }
 	
 	@SuppressWarnings("deprecation<String, String>")
-	private String parseParams(HashMap params) {
+	private static String parseParams(HashMap params) {
 		String result = "";
-        if (params != null) {
+        if (params != null || !params.isEmpty()) {
             Iterator it = params.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry pairs = (Map.Entry)it.next();
@@ -193,7 +182,7 @@ public class Request {
 		return result;
 	}
 	
-	private StringBuffer readResponce(HttpURLConnection con) throws IOException {
+	private static StringBuffer readResponce(HttpURLConnection con) throws IOException {
 		BufferedReader in = new BufferedReader(
 		        new InputStreamReader(con.getInputStream()));
 		String inputLine;

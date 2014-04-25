@@ -2,12 +2,12 @@ package teamlabAPI;
 
 import java.util.HashMap;
 
-public class TeamlabAPIAuth extends TeamlabAPI{
+public class TeamlabAPIAuth{
 
-    public TeamlabAPIAuth(String portalName, String region, String server) {
-        super(portalName, region, server);
-        this.apiURL += "/AUTHENTICATION";
-        this.request = new Request(this.apiURL, this.useSSL);
+    private String apiURL = "";
+
+    public TeamlabAPIAuth(String apiURL) {
+        this.apiURL = apiURL + "/AUTHENTICATION";
     }
 
     public String getToken(String login, String password) {
@@ -15,7 +15,7 @@ public class TeamlabAPIAuth extends TeamlabAPI{
         HashMap<String,String> params =  new HashMap<String,String>();
         params.put("userName", login);
         params.put("password", password);
-        String response = request.sendPost(params);
+        String response = Request.sendPost(this.apiURL, params, "");
         token = XMLParser.parseStringXML(response, "//token");
         return token;
     }
