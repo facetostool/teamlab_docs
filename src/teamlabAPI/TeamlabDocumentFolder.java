@@ -5,7 +5,7 @@ package teamlabAPI;
  */
 public class TeamlabDocumentFolder {
 
-    private int id;
+    private String id;
     private int parentId;
     private int fileCounts;
     private int foldersCounts;
@@ -17,7 +17,7 @@ public class TeamlabDocumentFolder {
     private String createdBy;
     private String updatedTime;
 
-    public TeamlabDocumentFolder(int id, int parentId, int fileCounts, int foldersCounts,
+    public TeamlabDocumentFolder(String id, int parentId, int fileCounts, int foldersCounts,
                                boolean isShareable, String title, int access,
                                boolean sharedByMe, String updatedBy, String createdBy, String updatedTime) {
         this.id = id;
