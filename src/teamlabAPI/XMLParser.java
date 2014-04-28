@@ -13,6 +13,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 public class XMLParser {
@@ -47,17 +48,20 @@ public class XMLParser {
             e.printStackTrace();
         }
 
+        return parseElementXML(document.getDocumentElement(), xpathStr);
+	}
+
+    public static String parseElementXML(Element element, String xpathStr) {
         XPathFactory xpathFactory = XPathFactory.newInstance();
-		XPath xpath = xpathFactory.newXPath();
-        // XPath Query for showing all nodes value
+        XPath xpath = xpathFactory.newXPath();
         String findingElem = null;
         try {
-            findingElem = xpath.evaluate(xpathStr, document);
+            findingElem = xpath.evaluate(xpathStr, element);
         } catch (XPathExpressionException e) {
-            System.out.println("\nCan't find '" + xpathStr + "' in: \n" + stringXML);
+            System.out.println("\nCan't find '" + xpathStr + "' in: \n" + element);
             e.printStackTrace();
         }
         return findingElem;
-	}
+    }
 	
 }
