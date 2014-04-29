@@ -13,6 +13,11 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class Request {
 
+    public static String POST = "POST";
+    public static String GET = "GET";
+    public static String PUT = "PUT";
+    public static String DELETE = "DELETE";
+
 	private static boolean USE_SSL = true;
 	
 	private static String fullURL(String url) {
@@ -44,8 +49,8 @@ public class Request {
         }
         return con;
     }
-	
-	public static String sendGet(String url, HashMap params, String token) {
+
+    public static String sendRequest(String requestType, String url, HashMap params, String token) {
         String response = null;
         String sendingParams = parseParams(params);
         String fullUrl = fullURL(url);
@@ -55,7 +60,7 @@ public class Request {
             con.setRequestProperty("Authorization", token);
 
             try {
-                con.setRequestMethod("GET");
+                con.setRequestMethod(requestType);
             } catch (ProtocolException e) {
                 e.printStackTrace();
             }
@@ -92,68 +97,6 @@ public class Request {
             System.out.println("\nSending 'GET' request to URL : " + fullUrl);
             System.out.println("Post parameters : " + sendingParams);
             System.out.println("Response Code : " + responseCode);
-            try {
-                response = readResponce(con).toString();
-            } catch (IOException e) {
-                System.out.println("Can't read response.");
-                e.printStackTrace();
-            }
-        }
-
-		return  response;
-	}
-	
-	public static String sendPost(String url, HashMap params, String token) {
-        String fullUrl = fullURL(url);
-		String sendingParams = parseParams(params);
-        String response = null;
-        HttpsURLConnection con = createConnection(fullUrl);
-
-        if (con != null) {
-            con.setDoInput(true);
-            con.setRequestProperty("Authorization", token);
-            //add request header
-            try {
-                con.setRequestMethod("POST");
-            } catch (ProtocolException e) {
-                System.out.println("Can't send POST request for url: " + fullUrl);
-                e.printStackTrace();
-            }
-
-            // Send post request
-            con.setDoOutput(true);
-
-            if(!sendingParams.equals("")) {
-                DataOutputStream wr = null;
-                try {
-                    wr = new DataOutputStream(con.getOutputStream());
-                } catch (IOException e) {
-                    System.out.println("Can't read DataOutputStream!");
-                    e.printStackTrace();
-                }
-                if (wr != null) {
-                    try {
-                        wr.writeBytes(sendingParams);
-                        wr.flush();
-                        wr.close();
-                    } catch (IOException e) {
-                        System.out.println("Can't puts params for request: " + sendingParams);
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            int responseCode = 0;
-            try {
-                responseCode = con.getResponseCode();
-            } catch (IOException e) {
-                System.out.println("Can't getting response code.");
-                e.printStackTrace();
-            }
-            System.out.println("\nSending 'POST' request to URL : " + fullUrl);
-            System.out.println("Post parameters : " + sendingParams);
-            System.out.println("Response Code : " + responseCode);
-
             try {
                 response = readResponce(con).toString();
             } catch (IOException e) {
